@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     AUTHORITY: str
     SCOPE: str
     SESSION_SECRET_KEY: str
+    DB_PASSWORD: str
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
 
     class Config:
         env_file = ".env"
