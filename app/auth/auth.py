@@ -55,7 +55,7 @@ def callback(request: Request, response: Response):
         create_session(response, user_data)
 
         # Create redirect response AFTER setting the cookie
-        redirect_response = RedirectResponse(url="/auth/profile")
+        redirect_response = RedirectResponse(url=f"{settings.FRONTEND_URL}")
         create_session(redirect_response, user_data)  # Attach cookie to the redirect response
         return redirect_response
     else:

@@ -8,6 +8,10 @@ router = APIRouter()
 
 @router.post("/generate-code")
 def create_code(request: Request):
+    """
+    POST route for code creation.
+    It requires to be authenticated in order to POST
+    """
     session = get_session(request)
     if not session:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -17,6 +21,12 @@ def create_code(request: Request):
 
 @router.post("/validate-code/{token}") # It is necessary to increase the security here
 def validate_code(token: str):
+    """
+    POST route for code validation.
+    Example: /access/validate-code/abc123
+
+    Currently does not have any security implemented.
+    """
     is_valid, message = validate_access_code(token)
     if not is_valid:
         raise HTTPException(status_code=400, detail=message)
@@ -25,7 +35,7 @@ def validate_code(token: str):
 #@router.get("/generate-code-temp")
 #def temp_generate_code(request: Request):
     """
-    Temporary GET route for code validation.
+    Temporary GET route for code creation.
     Example: /access/validate-code/abc123
     """
     session = get_session(request)

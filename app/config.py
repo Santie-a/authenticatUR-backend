@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     SUPABASE_URL: str
     SUPABASE_KEY: str
+    FRONTEND_URL: str
 
     class Config:
         env_file = ".env"
