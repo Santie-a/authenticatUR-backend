@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     SUPABASE_URL: str
     SUPABASE_KEY: str
     FRONTEND_URL: str
+    JWT_SECRET: str
+    JWT_ALGORITHM: str
+    JWT_EXPIRATION_MINUTES: int
 
     class Config:
         env_file = ".env"

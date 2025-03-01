@@ -19,39 +19,22 @@ def create_code(request: Request):
     token = generate_access_code(session["username"])
     return JSONResponse(content={"token": token})
 
-@router.post("/validate-code/{token}") # It is necessary to increase the security here
-def validate_code(token: str):
+@router.post("/validate-code") # It is necessary to increase the security here
+async def validate_code(request: Request):
     """
-    POST route for code validation.
-    Example: /access/validate-code/abc123
+    POST route for code validation. In the body of the request is the token, UUID of the validator and mode.
+    """
+    body = await request.json()
+    token = body.get("token")
+    validator_id = body.get("validator_id")
+    action = body.get("action")
 
-    Currently does not have any security implemented.
-    """
-    is_valid, message = validate_access_code(token)
+    if not token or not validator_id or not action:
+        raise HTTPException(status_code=400, detail="Details are missing")
+
+    is_valid, message = validate_access_code(token, validator_id, action)
+
     if not is_valid:
         raise HTTPException(status_code=400, detail=message)
-    return {"message": message}
-
-#@router.get("/generate-code-temp")
-#def temp_generate_code(request: Request):
-    """
-    Temporary GET route for code creation.
-    Example: /access/validate-code/abc123
-    """
-    session = get_session(request)
-    if not session:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
-    token = generate_access_code(session["username"])
-    return JSONResponse(content={"token": token})
-
-#@router.get("/validate-code/{token}")
-#def temp_validate_code(token: str):
-    """
-    Temporary GET route for code validation.
-    Example: /access/validate-code/abc123
-    """
-    is_valid, message = validate_access_code(token)
-    if not is_valid:
-        return {"status": "error", "message": message}
-    return {"status": "success", "message": message}
+    return {"message": message}
