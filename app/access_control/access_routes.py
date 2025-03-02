@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from app.auth.auth import profile  # Assuming JWT/session logic exists
 from .access_code import generate_access_code, validate_access_code
 from app.auth.auth import get_session
 

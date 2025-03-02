@@ -1,8 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel, OAuthFlowAuthorizationCode
-from fastapi.security import OAuth2
 from app.auth.auth import router as auth_router
 from app.access_control.access_routes import router as access_router
 

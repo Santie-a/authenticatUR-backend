@@ -1,5 +1,5 @@
 import jwt
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from app.config import settings
 from app.database.supabase_client import supabase
 

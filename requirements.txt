@@ -5,3 +5,5 @@ msal
 requests
 itsdangerous
 supabase
+pyJWT
+pydantic-settings
