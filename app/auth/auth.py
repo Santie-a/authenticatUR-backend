@@ -71,7 +71,6 @@ def profile(request: Request):
 
 @router.get("/logout")
 def logout(response: Response):
-    response = RedirectResponse(url=settings.FRONTEND_URL)
     response.delete_cookie(
         key="session_token",
         httponly=True,
