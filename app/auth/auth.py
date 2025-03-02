@@ -78,5 +78,5 @@ def logout(response: Response):
         samesite="None"
     )
 
-    return RedirectResponse(url=settings.FRONTEND_URL)
+    return JSONResponse(content={"message": "Logout successful"}, status_code=200)
 
