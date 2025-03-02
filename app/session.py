@@ -12,8 +12,8 @@ def create_session(response: Response, user_data: dict):
         key="session_token",
         value=token,
         httponly=True,  # Prevents JS access (XSS protection)
-        secure=False,   # Set to True in production (for HTTPS)
-        samesite="lax"
+        secure=settings.SECURE_COOKIE,   # Set to True in production (for HTTPS)
+        samesite="None"
     )
 
 # Get session data

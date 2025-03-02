@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_ALGORITHM: str
     JWT_EXPIRATION_MINUTES: int
+    SECURE_COOKIE: bool
 
     class Config:
         env_file = ".env"
