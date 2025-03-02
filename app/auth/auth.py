@@ -74,9 +74,8 @@ def logout(response: Response):
     response.delete_cookie(
         key="session_token",
         httponly=True,
-        secure=settings.SECURE_COOKIE,
-        samesite="None"
+        secure=True,   # Must match how the cookie was set
+        samesite="None"  # Must match how the cookie was set
     )
-
-    return JSONResponse(content={"message": "Logout successful"}, status_code=200)
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}", status_code=303)
 
