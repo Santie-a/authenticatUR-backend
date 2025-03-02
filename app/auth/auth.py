@@ -78,5 +78,6 @@ def logout(response: Response):
         secure=settings.SECURE_COOKIE,
         samesite="None"
     )
-    return response
+
+    return JSONResponse(content={"message": "Logged out successfully"}, status_code=200)
 
