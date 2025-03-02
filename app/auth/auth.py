@@ -71,11 +71,14 @@ def profile(request: Request):
 
 @router.get("/logout")
 def logout(response: Response):
+    response = RedirectResponse(url=f"{settings.FRONTEND_URL}")
     response.delete_cookie(
         key="session_token",
         httponly=True,
         secure=True,   # Must match how the cookie was set
         samesite="None"  # Must match how the cookie was set
     )
-    return RedirectResponse(url=f"{settings.FRONTEND_URL}", status_code=303)
+    response.headers["Access-Control-Allow-Origin"] = f"{settings.FRONTEND_URL}"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
