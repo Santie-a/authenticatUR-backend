@@ -18,7 +18,3 @@ app.add_middleware(
 # Include Routes
 app.include_router(auth_router, prefix="/auth", tags=["Authorization"])
 app.include_router(access_router, prefix="/access", tags=["Access Control"])
-
-@app.get("/")
-def read_root():
-    return {"message": "FastAPI with Microsoft OAuth"}

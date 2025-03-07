@@ -58,4 +58,4 @@ def validate_access_code(token: str, validator_id: str, action: str) -> tuple[bo
     if not valid_token:
         return False, message_token
 
-    return True, "Access granted"
+    return True, "Valid Code"

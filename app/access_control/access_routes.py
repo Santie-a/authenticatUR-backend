@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from .access_code import generate_access_code, validate_access_code
 from app.auth.auth import get_session
+from app.utils.api_security import validate_api_key
 
 router = APIRouter()
 
@@ -19,7 +20,7 @@ def create_code(request: Request):
     return JSONResponse(content={"token": token})
 
 @router.post("/validate-code") # It is necessary to increase the security here
-async def validate_code(request: Request):
+async def validate_code(request: Request, api_key: str = Depends(validate_api_key)):
     """
     POST route for code validation. In the body of the request is the token, UUID of the validator and mode.
     """
@@ -36,4 +37,4 @@ async def validate_code(request: Request):
     if not is_valid:
         raise HTTPException(status_code=400, detail=message)
     
-    return {"message": message}
+    return {"detail": message}

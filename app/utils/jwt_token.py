@@ -2,6 +2,7 @@ import jwt
 from datetime import datetime, timezone
 from app.config import settings
 from app.database.supabase_client import supabase
+from fastapi import HTTPException
 
 def generate_jwt(payload: dict) -> str:
     """
@@ -17,9 +18,22 @@ def generate_jwt(payload: dict) -> str:
 
 def get_jwt_data(token: str) -> dict:
     """
-    Decodes a JWT and returns its data
+    Decodes a JWT and returns its data.
+    
+    Returns a Dict if the token is valid. Otherwise raises an HTTP Exception
+
+    **Args**
+
+    - **token**:
+    Token coded as a JWT
     """
-    return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+    try:
+        return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid token: {str(e)}"
+        )
 
 def validate_token(code: str, user_id: str, action: str) -> tuple[bool, str]:
     """
