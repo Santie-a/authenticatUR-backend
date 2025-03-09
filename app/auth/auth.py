@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Request, HTTPException, Response
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse, JSONResponse
 from msal import ConfidentialClientApplication
-from app.config import settings
-from app.session import create_session, get_session
+from datetime import timedelta, timezone, datetime
 import uuid
+
+from app.config import settings
+from app.session import create_jwt, verify_jwt
+from app.database.supabase_client import supabase
+from app.utils.exchange_code import verify_exchange_code
 
 router = APIRouter()
 
@@ -31,7 +35,7 @@ def login():
     return RedirectResponse(auth_url)
 
 @router.get("/callback")
-def callback(request: Request, response: Response):
+def callback(request: Request):
     code = request.query_params.get("code")
     state = request.query_params.get("state")
 
@@ -51,34 +55,49 @@ def callback(request: Request, response: Response):
             "username": result.get("id_token_claims", {}).get("preferred_username")
         }
 
-        # Create the session cookie
-        create_session(response, user_data)
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
 
-        # Create redirect response AFTER setting the cookie
-        redirect_response = RedirectResponse(url=f"{settings.FRONTEND_URL}")
-        create_session(redirect_response, user_data)  # Attach cookie to the redirect response
-        return redirect_response
+        supabase.table("exchange_codes").insert({
+            "code": code,
+            "user_id": result.get("id_token_claims", {}).get("preferred_username"),
+            "expires_at": expires_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }).execute()
+
+        # Redirect to frontend and pass the token in a response header
+        response = RedirectResponse(url=f"{settings.FRONTEND_URL}?code={code}")
+        return response
     else:
         raise HTTPException(status_code=400, detail="Token acquisition failed")
 
 
 @router.get("/profile")
 def profile(request: Request):
-    session = get_session(request)
-    if not session:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    return JSONResponse(content={"message": "User Profile", "user": session})
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
+
+    token = auth_header.split("Bearer ")[1]
+    user_data = verify_jwt(token)
+
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    return JSONResponse(content={"message": "User Profile", "user": user_data})
+
 
 @router.get("/logout")
-def logout(response: Response):
-    response = RedirectResponse(url=f"{settings.FRONTEND_URL}")
-    response.delete_cookie(
-        key="session_token",
-        httponly=True,
-        secure=True,   # Must match how the cookie was set
-        samesite="None"  # Must match how the cookie was set
-    )
-    response.headers["Access-Control-Allow-Origin"] = f"{settings.FRONTEND_URL}"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
+def logout():
+    return JSONResponse(content={"message": "Logout successful"})
 
+@router.get("/exchange")
+def exchange(request: Request):
+    exchange_code_header = request.headers.get("ExchangeCode")
+    if not exchange_code_header or not exchange_code_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
+    
+    exchange_code = exchange_code_header.split("Bearer ")[1]
+
+    username = verify_exchange_code(exchange_code)
+    token = create_jwt({"username": username})
+
+    return JSONResponse(content={"token": token})

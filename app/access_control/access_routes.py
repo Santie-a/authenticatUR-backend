@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from .access_code import generate_access_code, validate_access_code
-from app.auth.auth import get_session
+from app.session import verify_jwt
 from app.utils.api_security import validate_api_key
 
 router = APIRouter()
@@ -12,11 +12,17 @@ def create_code(request: Request):
     POST route for code creation.
     It requires to be authenticated in order to POST
     """
-    session = get_session(request)
-    if not session:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
+
+    token = auth_header.split("Bearer ")[1]
+    user_data = verify_jwt(token)
+
+    if not user_data:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
-    token = generate_access_code(session["username"])
+    token = generate_access_code(user_data["username"])
     return JSONResponse(content={"token": token})
 
 @router.post("/validate-code") # It is necessary to increase the security here

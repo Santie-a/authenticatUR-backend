@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 def generate_jwt(payload: dict) -> str:
     """
-    Generates a JWT based on a code and the user_id
+    Generates a JWT that stores the payload
 
     **Args**
 
